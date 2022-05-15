@@ -22,7 +22,7 @@
       <textarea
         class="chat-box__form__input"
         type="text"
-        placeholder="메세지를 입력하세요."
+        placeholder="Type your message"
         v-model.trim="msg"
         @keydown.enter.exact.prevent="submitMessage"
       />
