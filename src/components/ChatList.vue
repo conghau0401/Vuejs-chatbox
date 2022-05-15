@@ -25,12 +25,24 @@
 <style lang="scss" scoped>
   .chat-box {
     &__body {
-      overflow: scroll;
+      overflow-y: auto;
       scroll-behavior: smooth;
       height: 350px;
       padding: 15px;
-      &::-webkit-scrollbar {
-        display: none;
+      &::-webkit-scrollbar-track
+      {
+        background-color: var(--bs-gray-100);;
+      }
+
+      &::-webkit-scrollbar
+      {
+        width: 3px;
+        background-color: var(--bs-gray-100);
+      }
+
+      &::-webkit-scrollbar-thumb
+      {
+        background-color: var(--bs-gray-300);
       }
     }
     &__message {
@@ -44,9 +56,8 @@
     }
     &__paragraph {
       background-color: #CFD7E2;
-      color: var(--bs-gray-700);
       font-size: 14px;
-      padding: 10px 15px;
+      padding: 8px 15px;
       border-radius: 10px;
       margin: 0;
       text-align: left;
@@ -56,8 +67,8 @@
       margin: 0 10px 0 0;
     }
     &__img {
-      width: 40px;
-      height: 40px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
       object-fit: cover;
       margin: 0;
