@@ -9,7 +9,7 @@
         <li>Matching</li>
       </ul>
     </div>
-    <chat-list :msgs="msgData"></chat-list>
+    <chat-list :msgs="sortMsgsData" :itsMe="itsMe"></chat-list>
     <chat-form @submitMessage="sendMessage"></chat-form>
   </div>
 </template>
@@ -17,6 +17,8 @@
 <script>
 import ChatList from "@/components/ChatList";
 import ChatForm from "@/components/ChatForm";
+import firebase from "../firebaseInit";
+const db = firebase.firestore();
 export default {
   components: {
     ChatList,
@@ -24,58 +26,121 @@ export default {
   },
   data() {
     return {
+      id: Number,
+      name: String,
       myAvatar: "/img/avatar1.jpeg",
-      msgData: [
-        {
-          from: {
-            id: 1,
-            name: "John",
-            avatar: "/img/avatar2.jpeg",
-          },
-          msg: "Hi, How are you!",
-        },
-        {
-          from: {
-            id: 0,
-            name: "me",
-            avatar: "/img/avatar1.jpeg",
-          },
-          msg: "Welcome!!",
-        },
-        {
-          from: {
-            id: 2,
-            name: "Marry",
-            avatar: "/img/avatar3.jpeg",
-          },
-          msg: "Nice to meet u!",
-        },
-        {
-          from: {
-            id: 2,
-            name: "Marry",
-            avatar: "/img/avatar3.jpeg",
-          },
-          msg: "Nice to meet u!",
-        },
-      ],
+      itsMe: Number,
+      date: Date(),
+      msgsData: [],
+      startDay: new Date('2022-01-01')
     };
+  },
+  computed: {
+    sortMsgsData() {
+      return this.msgsData
+        .filter(s => new Date(s.date) >= this.startDay)
+        .sort((a, b) => new Date(a.date) - new Date(b.date)
+      );
+    },
   },
   methods: {
     sendMessage(msg) {
-      this.msgData.push({
-        from: {
-          id: 0,
-          name: "me",
-          avatar: this.myAvatar,
-        },
-        msg,
-      });
-      setTimeout(() => {
-        var element = document.getElementById("chat-box__body");
-        element.scrollTop = element.scrollHeight;
-      }, 0);
+      if (msg != "") {
+        db.collection("users")
+          .add({
+            from: {
+              id: this.id,
+              name: this.name,
+              avatar: this.myAvatar
+            },
+            date: this.date,
+            msg: msg
+          })
+          .then(() => {
+            this.getUser();
+            setTimeout(() => {
+              var element = document.getElementById("chat-box__body");
+              element.scrollTop = element.scrollHeight;
+            }, 0);
+          })
+          .catch((error) => {
+            console.error("Error writing document: ", error);
+          });
+      }
     },
+    getUser() {
+      this.msgsData = [];
+      db.collection("users")
+        .get()
+        .then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+            this.msgsData.push({
+              from: {
+                id: doc.data().from.id,
+                name: doc.data().from.name,
+                avatar: doc.data().from.avatar,
+              },
+              date: doc.data().date,
+              msg: doc.data().msg
+            });
+            setTimeout(() => {
+              var element = document.getElementById("chat-box__body");
+              element.scrollTop = element.scrollHeight;
+            }, 0);
+          });
+        })
+        .catch((error) => {
+          console.log("Error getting documents: ", error);
+        });
+    }
+  },
+  async mounted() {
+    await this.getUser();
+    //set idUser cookie
+    function setCookie(cname, cvalue, exdays) {
+      const d = new Date();
+      d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+      let expires = "expires="+d.toUTCString();
+      document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+    }
+
+    //get idUser cookie
+    function getCookie(cname) {
+      let name = cname + "=";
+      let decodedCookie = decodeURIComponent(document.cookie);
+      let ca = decodedCookie.split(';');
+      for(let i = 0; i <ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+          c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+          return c.substring(name.length, c.length);
+        }
+      }
+      return "";
+    }
+
+    //check isset idUser
+    if (document.cookie.indexOf('idUser') == -1 ) {
+      setCookie("idUser", Math.floor(Math.random() * 90000) + 10000, 365);
+      setCookie("nameUser", createNameUser(5), 365);
+    }
+
+    //assign id
+    this.id = this.itsMe = getCookie("idUser");
+    this.name = getCookie("nameUser");
+
+    //Create User name
+    function createNameUser(length) {
+        var result           = '';
+        var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+        var charactersLength = characters.length;
+        for ( var i = 0; i < length; i++ ) {
+          result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      }
+      return result;
+    }
   },
 };
 </script>

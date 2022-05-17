@@ -59,6 +59,7 @@
 <script>
 import EmojiPicker from 'vue3-emoji-picker'
 import "../../node_modules/vue3-emoji-picker/dist/style.css";
+
 export default {
   data() {
     return {

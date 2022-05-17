@@ -4,7 +4,7 @@
       v-for="(msg, index) in msgs"
       :key="index"
       :msg="msg"
-      :class="['chat-box__message d-flex align-items-start', msg.from.id == 0 ? 'chat-box__me justify-content-end' : '']">
+      :class="['chat-box__message d-flex align-items-start', msg.from.id == itsMe ? 'chat-box__me justify-content-end' : '']">
       <p class="chat-box__avartar">
         <img :src="msg.from.avatar" alt="" class="chat-box__img" />
       </p>
@@ -18,7 +18,10 @@
 
 <script>
   export default {
-    props: ["msgs"],
+    props: {
+      msgs: [],
+      itsMe: Number
+    },
   };
 </script>
 
