@@ -1,14 +1,16 @@
 <template>
-  <ChatBox />
+  <ChatBoxLogin />
 </template>
 
 <script>
-import ChatBox from "./components/ChatBox.vue";
+// import ChatBox from "./components/ChatBox.vue";
+import ChatBoxLogin from "./components/ChatBoxLogin.vue";
 
 export default {
   name: "App",
   components: {
-    ChatBox,
+    // ChatBox,
+    ChatBoxLogin
   },
 };
 </script>
