@@ -55,6 +55,18 @@
         </svg>
       </div>
     </div>
+    <div v-if="showFile" class="attachment-file">
+      <div class="d-table">
+        <div class="d-flex align-items-center">
+          <p class="img" v-if="fileImage != ''"><img :src="fileImage" alt=""></p>
+          <p class="img" v-else><img src="/img/file.png" alt=""></p>
+          <p class="name">{{ fileName }} nguyenconghau.rar</p>
+          <p class="icon-close" @click="removeFile">
+            <img src="/img/icons8-close-24.svg" alt="">
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -67,8 +79,9 @@ export default {
     return {
       msg: "",
       showEmoji: false,
-      fileURL: null,
-      image: ''
+      showFile: false,
+      fileImage: '',
+      fileName: ''
     };
   },
   components: {
@@ -91,18 +104,59 @@ export default {
     },
     chooseFile(event) {
       var fileName = event.target.files[0].name;
-      this.msg += fileName;
+      this.fileName = fileName;
+      // this.msg += fileName;
+      this.showFile = true
       //Todo
-      // const format = ['png', 'jpeg', 'jpg', 'webp', 'svg'];
-      // let fileExtensions = fileName.split(".");
-      // console.log(format.indexOf(fileExtensions[fileExtensions.length-1]));
-      // console.log(fileExtensions);
+      const format = ['png', 'jpeg', 'jpg', 'webp', 'svg'];
+      let fileExtensions = fileName.split(".");
+      let checkType = format.indexOf(fileExtensions[fileExtensions.length-1]);
+      if (checkType == 0) {
+        const file = event.target.files[0];
+        this.fileImage = URL.createObjectURL(file);
+      }
     },
+    removeFile() {
+      document.getElementById('choose-file').value = "";
+      this.showFile = false
+    }
   }
 };
 </script>
 
 <style lang="scss" scoped>
+.attachment-file {
+  border: 1px solid #ccc;
+  padding: 2px 5px;
+  border-radius: 5px;
+  margin-top: 10px;
+  position: relative;
+  p {
+    margin: 0;
+    &.icon-close {
+      position: absolute;
+      right: -7px;
+      top: -12px;
+      width: 14px;
+      cursor: pointer;
+      img {
+        width: 100%;
+      }
+    }
+    &.img {
+      width: 75px;
+      height: auto;
+      img {
+        width: 100%;
+        object-fit: cover;
+      }
+    }
+    &.name {
+      margin-left: 10px;
+      font-size: 13px;
+    }
+  }
+}
 .chat-box {
   &__form {
     padding: 15px 15px;
