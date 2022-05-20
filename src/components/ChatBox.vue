@@ -9,7 +9,7 @@
         <li>Matching</li>
       </ul>
     </div>
-    <chat-list :msgs="sortMsgsData" :itsMe="itsMe"></chat-list>
+    <chat-list :msgs="msgsData" :itsMe="itsMe"></chat-list>
     <chat-form @submitMessage="sendMessage"></chat-form>
   </div>
 </template>
@@ -17,8 +17,8 @@
 <script>
 import ChatList from "@/components/ChatList";
 import ChatForm from "@/components/ChatForm";
-import firebase from "../firebaseInit";
-const db = firebase.firestore();
+import TutorialDataService from "../services/TutorialDataService";
+
 export default {
   components: {
     ChatList,
@@ -32,70 +32,63 @@ export default {
       itsMe: Number,
       date: Date(),
       msgsData: [],
-      startDay: new Date('2022-01-01')
+      startDay: new Date('2022-01-01'),
     };
   },
-  computed: {
-    sortMsgsData() {
-      return this.msgsData
-        .filter(s => new Date(s.date) >= this.startDay)
-        .sort((a, b) => new Date(a.date) - new Date(b.date)
-      );
-    },
-  },
+  props: ["tutorial"],
   methods: {
     sendMessage(msg) {
-      if (msg != "") {
-        db.collection("users")
-          .add({
-            from: {
-              id: this.id,
-              name: this.name,
-              avatar: this.myAvatar
-            },
-            date: this.date,
-            msg: msg
-          })
-          .then(() => {
-            this.getUser();
-            setTimeout(() => {
-              var element = document.getElementById("chat-box__body");
-              element.scrollTop = element.scrollHeight;
-            }, 0);
-          })
-          .catch((error) => {
-            console.error("Error writing document: ", error);
-          });
-      }
-    },
-    getUser() {
-      this.msgsData = [];
-      db.collection("users")
-        .get()
-        .then((querySnapshot) => {
-          querySnapshot.forEach((doc) => {
-            this.msgsData.push({
-              from: {
-                id: doc.data().from.id,
-                name: doc.data().from.name,
-                avatar: doc.data().from.avatar,
-              },
-              date: doc.data().date,
-              msg: doc.data().msg
-            });
-            setTimeout(() => {
-              var element = document.getElementById("chat-box__body");
-              element.scrollTop = element.scrollHeight;
-            }, 0);
-          });
+      var data = {
+        from: {
+          id: this.id,
+          name: this.name,
+          avatar: this.myAvatar
+        },
+        date: this.date,
+        msg: msg
+      };
+      TutorialDataService.create(data)
+        .then(() => {
+          setTimeout(() => {
+            var element = document.getElementById("chat-box__body");
+            element.scrollTop = element.scrollHeight;
+          }, 0);
         })
-        .catch((error) => {
-          console.log("Error getting documents: ", error);
+        .catch(e => {
+          console.log(e);
+      });
+    },
+    onDataChange(items) {
+      let _msgs = [];
+      items.forEach((item) => {
+        let data = item.val();
+        _msgs.push({
+          from: {
+            id: data.from.id,
+            name: data.from.name,
+            avatar: data.from.avatar
+          },
+          date: data.date,
+          msg: data.msg
         });
-    }
+      });
+      setTimeout(() => {
+        var element = document.getElementById("chat-box__body");
+        element.scrollTop = element.scrollHeight;
+      }, 0);
+
+      this.msgsData = _msgs;
+    },
+  },
+  watch: {
+    user: function(user) {
+      this.msgsData = { ...user };
+    },
   },
   async mounted() {
-    await this.getUser();
+    //call response to API
+    TutorialDataService.getAll().on("value", this.onDataChange);
+
     //set idUser cookie
     function setCookie(cname, cvalue, exdays) {
       const d = new Date();

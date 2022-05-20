@@ -1,5 +1,5 @@
-// src/firebaseInit.js
-import firebase from "firebase";
+import firebase from "firebase/app";
+import "firebase/database";
 
 // Your web app's Firebase configuration
 var firebaseConfig = {
@@ -12,5 +12,6 @@ var firebaseConfig = {
     measurementId: "G-S3XE60WXF8"
 };
 
-// Initialize Firebase
-export default firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
+
+export default firebase.database();
