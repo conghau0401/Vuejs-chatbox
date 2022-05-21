@@ -1,27 +1,28 @@
 import firebase from "../firebaseInit";
 
-const db = firebase.ref("/users");
+export default class TutorialDataService {
 
-class TutorialDataService {
+  constructor(id) {
+    this.db = firebase.ref(`room-${id}`);
+  }
+
   getAll() {
-    return db.limitToLast(20);
+    return this.db.limitToLast(20);
   }
 
   create(user) {
-    return db.push(user);
+    return this.db.push(user);
   }
 
   update(key, value) {
-    return db.child(key).update(value);
+    return this.db.child(key).update(value);
   }
 
   delete(key) {
-    return db.child(key).remove();
+    return this.db.child(key).remove();
   }
 
   deleteAll() {
-    return db.remove();
+    return this.db.remove();
   }
 }
-
-export default new TutorialDataService();

@@ -25,6 +25,9 @@ export default {
     ChatForm,
   },
   data() {
+
+    this.firebaseService = new TutorialDataService(this.roomId);
+
     return {
       id: Number,
       name: String,
@@ -35,7 +38,9 @@ export default {
       startDay: new Date('2022-01-01'),
     };
   },
-  props: ["tutorial"],
+  props: {
+    roomId: Number,
+  },
   methods: {
     sendMessage(msg) {
       var data = {
@@ -47,7 +52,7 @@ export default {
         date: this.date,
         msg: msg
       };
-      TutorialDataService.create(data)
+      this.firebaseService.create(data)
         .then(() => {
           setTimeout(() => {
             var element = document.getElementById("chat-box__body");
@@ -87,7 +92,7 @@ export default {
   },
   async mounted() {
     //call response to API
-    TutorialDataService.getAll().on("value", this.onDataChange);
+    this.firebaseService.getAll().on("value", this.onDataChange);
 
     //set idUser cookie
     function setCookie(cname, cvalue, exdays) {

@@ -1,5 +1,5 @@
 <template>
-  <ChatBox />
+  <ChatBox :user="user" :room-id="slug" />
 </template>
 
 <script>
@@ -10,6 +10,16 @@ export default {
   components: {
     ChatBox
   },
+  data() {
+    return {
+      user: {
+        id: 10,
+        name: "Cong Hau",
+        avatar_url: "https://fdsfds.com/fdf.png"
+      },
+      slug: "1"
+    }
+  }
 };
 </script>
 
