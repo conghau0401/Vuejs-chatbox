@@ -9,7 +9,7 @@
         <li>Matching</li>
       </ul>
     </div>
-    <chat-list :msgs="msgsData" :itsMe="this.user.itsMe"></chat-list>
+    <chat-list :msgs="msgsData" :itsMe="this.user.itsMe" :roomId="roomId"></chat-list>
     <chat-form @submitMessage="sendMessage"></chat-form>
   </div>
 </template>
@@ -24,18 +24,18 @@ export default {
     ChatList,
     ChatForm,
   },
+  props: {
+    roomId: Number,
+    user: Object,
+  },
   data() {
 
     this.firebaseService = new TutorialDataService(this.roomId);
 
     return {
       date: Date(),
-      msgsData: [],
+      msgsData: []
     };
-  },
-  props: {
-    roomId: Number,
-    user: Object,
   },
   methods: {
     sendMessage(msg) {
@@ -46,6 +46,7 @@ export default {
           avatar: this.user.avatar
         },
         date: this.date,
+        status: 1,
         msg: msg
       };
       this.firebaseService.create(data)
@@ -65,10 +66,12 @@ export default {
         let data = item.val();
         _msgs.push({
           from: {
+            key: item.key,
             id: data.from.id,
             name: data.from.name,
             avatar: data.from.avatar
           },
+          status: data.status,
           date: data.date,
           msg: data.msg
         });
