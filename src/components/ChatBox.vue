@@ -9,13 +9,14 @@
         <li>Matching</li>
       </ul>
     </div>
-    <chat-list :msgs="msgsData" :itsMe="this.user.itsMe" :roomId="roomId"></chat-list>
+    <chat-list :msgs="msgsData" :itsMe="this.user.itsMe" :roomId="roomId" ref="messages"></chat-list>
     <chat-form @submitMessage="sendMessage"></chat-form>
+    <p class="icon-loading" v-if="loading"><img src="/img/loading.gif" alt="Loading"></p>
   </div>
 </template>
 
 <script>
-// import $ from "jquery"
+import $ from "jquery"
 import ChatList from "@/components/ChatList";
 import ChatForm from "@/components/ChatForm";
 import TutorialDataService from "../services/TutorialDataService";
@@ -33,10 +34,24 @@ export default {
     this.firebaseService = new TutorialDataService(this.roomId);
     return {
       date: Date(),
-      msgsData: []
+      msgsData: [],
+      loading: false,
+      currentHeight: Number
     };
   },
+  unmounted () {
+    let element = document.querySelector(".chat-box__body")
+    element.removeEventListener('scroll', this.handleScroll);
+  },
   methods: {
+    handleScroll() {
+      let offsetTop = $(".chat-box__body").scrollTop();
+      this.loading = false
+      if (offsetTop <= 10) {
+        this.loading = true
+        this.firebaseService.getAll().limitToLast(20).on("value", this.onDataChange1);
+      }
+    },
     sendMessage(msg) {
       var data = {
         from: {
@@ -59,6 +74,29 @@ export default {
           console.log(e);
       });
     },
+    onDataChange1(items) {
+      setTimeout(() => {
+        let _msgs = [];
+        items.forEach((item) => {
+          let data = item.val();
+          _msgs.push({
+            from: {
+              key: item.key,
+              id: data.from.id,
+              name: data.from.name,
+              avatar: data.from.avatar
+            },
+            status: data.status,
+            date: data.date,
+            msg: data.msg
+          });
+        });
+        this.loading = false
+        this.msgsData = _msgs;
+        var element = document.getElementById("chat-box__body");
+        element.scrollTop = element.scrollHeight - (this.currentHeight + element.offsetHeight)
+      }, 2000);
+    },
     onDataChange(items) {
       let _msgs = [];
       items.forEach((item) => {
@@ -78,6 +116,7 @@ export default {
       setTimeout(() => {
         var element = document.getElementById("chat-box__body");
         element.scrollTop = element.scrollHeight;
+        this.currentHeight = element.scrollHeight;
       }, 0);
 
       this.msgsData = _msgs;
@@ -85,7 +124,13 @@ export default {
   },
   mounted() {
     //call response to API
-    this.firebaseService.getAll().on("value", this.onDataChange);
+    this.firebaseService.getAll().limitToLast(10).on("value", this.onDataChange);
+    
+    //scroll top
+    setTimeout(() => {
+      let element = document.querySelector(".chat-box__body")
+      element.addEventListener('scroll', this.handleScroll);
+    }, 2000);
   },
 };
 </script>
@@ -97,6 +142,7 @@ export default {
   border: 1px solid var(--bs-gray-300);
   font-size: 16px;
   margin: 0 auto;
+  position: relative;
   &__header {
     background: #ffffff;
     font-size: 16px;
@@ -127,6 +173,16 @@ export default {
           margin-left: 10px;
         }
       }
+    }
+  }
+  .icon-loading {
+    width: 100%;
+    position: absolute;
+    top: 25px;
+    left: 0;
+    margin: 0;
+    img {
+      width: 165px;
     }
   }
 }

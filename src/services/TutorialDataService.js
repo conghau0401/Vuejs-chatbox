@@ -7,7 +7,7 @@ export default class TutorialDataService {
   }
 
   getAll() {
-    return this.db.limitToLast(20);
+    return this.db;
   }
 
   create(user) {
