@@ -15,6 +15,7 @@
 </template>
 
 <script>
+// import $ from "jquery"
 import ChatList from "@/components/ChatList";
 import ChatForm from "@/components/ChatForm";
 import TutorialDataService from "../services/TutorialDataService";
@@ -29,9 +30,7 @@ export default {
     user: Object,
   },
   data() {
-
     this.firebaseService = new TutorialDataService(this.roomId);
-
     return {
       date: Date(),
       msgsData: []
